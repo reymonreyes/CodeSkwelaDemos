@@ -1,11 +1,20 @@
 ﻿@page "/weather"
+@using Microsoft.AspNetCore.Components.Sections
+@using SectionsDemo.Components.Layout
 @attribute [StreamRendering]
+@layout AlphaLayout
 
 <PageTitle>Weather</PageTitle>
 
 <h1>Weather</h1>
 
 <p>This component demonstrates showing data.</p>
+
+<SectionContent SectionId="AlphaLayout.TemperatureWidget">
+    <div class="alert alert-warning" role="alert">
+        Current Temperature: 32 C
+    </div>
+</SectionContent>
 
 @if (forecasts == null)
 {

@@ -12,7 +12,7 @@
         </div>
 
         <article class="content px-4">
-            <SectionOutlet SectionName="date-widget"></SectionOutlet>
+            <SectionOutlet SectionId="TemperatureWidget"></SectionOutlet>
             @Body
         </article>
     </main>
@@ -23,3 +23,7 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code{
+    internal static object TemperatureWidget = new();
+}
