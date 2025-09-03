@@ -13,8 +13,18 @@ Welcome to your new app.
 
 <div class="dialog-overlay" style="display:@dialogBox.Display;">
 </div>
-<div style="@dialogBox.CssString">
-    <p><b>This is a dialog box.</b></p>
+<div style="@dialogBox.CssString">    
+    <div class="card">
+        <div class="card-header position-relative">
+            <span>This is a dialog box.</span>
+            <button @onclick="CloseDialogBox" type="button" class="btn-close" aria-label="Close" style="float:right;"></button>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Special title treatment</h5>
+            <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+            <a href="#" class="btn btn-primary">Go somewhere</a>
+        </div>
+    </div>
 </div>
 
 @code{
@@ -28,6 +38,11 @@ Welcome to your new app.
         dialogBox.Display = "inherit";
     }
 
+    private void CloseDialogBox()
+    {
+        dialogBox.Display = "none";
+    }
+
     class WindowDimensions
     {
         public int Height { get; set; }
@@ -36,9 +51,9 @@ Welcome to your new app.
 
     class DialogBox
     {
-        public int Height { get; set; } = 300;
+        public int Height { get; set; } = 100;
         public int Width { get; set; } = 500;
-        public string BackgroundColor { get; set; } = "green";
+        public string BackgroundColor { get; set; } = "transparent";
         public int Top { get; set; } = 0;
         public int Left { get; set; } = 0;
         public int ZIndex { get; set; } = 999999;
@@ -48,7 +63,7 @@ Welcome to your new app.
         {
             get
             {
-                return $"height:{Height}px;width:{Width}px;background-color:{BackgroundColor};position:fixed;top:{Top}px;left:{Left}px;z-index:{ZIndex};display:{Display};";
+                return $"min-height:{Height}px;width:{Width}px;background-color:{BackgroundColor};position:fixed;top:{Top}px;left:{Left}px;z-index:{ZIndex};display:{Display};";
             }    
         }
     }
