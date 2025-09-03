@@ -20,7 +20,9 @@ Welcome to your new app.
 
     private async Task ShowDialogBox()
     {
-        var windowDimensions = await JSRuntime.InvokeAsync<WindowDimensions>("getWindowDimensions");
+        var windowDimensions = await JSRuntime.InvokeAsync<WindowDimensions>("getWindowDimensions");        
+        dialogBox.Left = (windowDimensions.Width / 2) - (dialogBox.Width / 2);
+        dialogBox.Top = (windowDimensions.Height / 2) - (dialogBox.Height / 2);
         dialogBox.Display = "inherit";
     }
 
@@ -35,8 +37,8 @@ Welcome to your new app.
         public int Height { get; set; } = 300;
         public int Width { get; set; } = 500;
         public string BackgroundColor { get; set; } = "green";
-        public int Top { get; set; }
-        public int Left { get; set; }
+        public int Top { get; set; } = 0;
+        public int Left { get; set; } = 0;
         public int ZIndex { get; set; } = 9999;
         public string Display { get; set; } = "none";
 
@@ -44,7 +46,7 @@ Welcome to your new app.
         {
             get
             {
-                return $"height:{Height}px;width:{Width}px;background-color:{BackgroundColor};position:fixed;top:{Top};left:{Left};z-index:{ZIndex};display:{Display};";
+                return $"height:{Height}px;width:{Width}px;background-color:{BackgroundColor};position:fixed;top:{Top}px;left:{Left}px;z-index:{ZIndex};display:{Display};";
             }    
         }
     }
