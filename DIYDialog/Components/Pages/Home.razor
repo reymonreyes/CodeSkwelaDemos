@@ -11,8 +11,10 @@ Welcome to your new app.
     <button class="btn btn-primary" @onclick="ShowDialogBox">Show Dialog Box</button>
 </div>
 
+<div class="dialog-overlay" style="display:@dialogBox.Display;">
+</div>
 <div style="@dialogBox.CssString">
-    <p>This is a dialog box.</p>
+    <p><b>This is a dialog box.</b></p>
 </div>
 
 @code{
@@ -39,7 +41,7 @@ Welcome to your new app.
         public string BackgroundColor { get; set; } = "green";
         public int Top { get; set; } = 0;
         public int Left { get; set; } = 0;
-        public int ZIndex { get; set; } = 9999;
+        public int ZIndex { get; set; } = 999999;
         public string Display { get; set; } = "none";
 
         public string CssString
