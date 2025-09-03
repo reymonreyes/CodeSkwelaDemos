@@ -1,4 +1,5 @@
 ﻿@page "/"
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Home</PageTitle>
 
@@ -10,15 +11,41 @@ Welcome to your new app.
     <button class="btn btn-primary" @onclick="ShowDialogBox">Show Dialog Box</button>
 </div>
 
-<div style="width: 500px; height: 300px; background-color: green; position: fixed; top: 0; left: 0; z-index: 9999; display: @display;">
+<div style="@dialogBox.CssString">
     <p>This is a dialog box.</p>
 </div>
 
 @code{
-    private string display = "none";
-    
-    private void ShowDialogBox()
+    private DialogBox dialogBox = new DialogBox();
+
+    private async Task ShowDialogBox()
     {
-        display = "inherit";
+        var windowDimensions = await JSRuntime.InvokeAsync<WindowDimensions>("getWindowDimensions");
+        dialogBox.Display = "inherit";
+    }
+
+    class WindowDimensions
+    {
+        public int Height { get; set; }
+        public int Width { get; set; }
+    }
+
+    class DialogBox
+    {
+        public int Height { get; set; } = 300;
+        public int Width { get; set; } = 500;
+        public string BackgroundColor { get; set; } = "green";
+        public int Top { get; set; }
+        public int Left { get; set; }
+        public int ZIndex { get; set; } = 9999;
+        public string Display { get; set; } = "none";
+
+        public string CssString
+        {
+            get
+            {
+                return $"height:{Height}px;width:{Width}px;background-color:{BackgroundColor};position:fixed;top:{Top};left:{Left};z-index:{ZIndex};display:{Display};";
+            }    
+        }
     }
 }
