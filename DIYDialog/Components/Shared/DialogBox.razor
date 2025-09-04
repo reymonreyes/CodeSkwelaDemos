@@ -5,19 +5,20 @@
 <div style="@dialogBox.CssString">
     <div class="card">
         <div class="card-header position-relative">
-            <span>This is a dialog box.</span>
+            <span>@dialogBox.Header</span>
             <button @onclick="Close" type="button" class="btn-close" aria-label="Close" style="float:right;"></button>
         </div>
         <div class="card-body">
-            <h5 class="card-title">Special title treatment</h5>
-            <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-            <a href="#" class="btn btn-primary">Go somewhere</a>
+            @ChildContent
         </div>
     </div>
 </div>
 
 @code {
     private DialogBoxSettings dialogBox = new DialogBoxSettings();
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
 
     public async Task Show()
     {
@@ -48,6 +49,7 @@
         public int Left { get; set; } = 0;
         public int ZIndex { get; set; } = 999999;
         public string Display { get; set; } = "none";
+        public string Header { get; set; } = "Dialog Box";
 
         public string CssString
         {
