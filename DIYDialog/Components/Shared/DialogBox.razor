@@ -8,7 +8,7 @@
             <span>@dialogBox.Header</span>
         </div>
         <div class="card-body">
-            @messageContent
+            @dialogBody
         </div>
         <div class="card-footer d-flex flex-row-reverse">
             @actionButtons
@@ -18,9 +18,10 @@
 
 @code {
     private DialogBoxSettings dialogBox = new DialogBoxSettings();
-    private string? messageContent { get; set; }
-    private TaskCompletionSource<bool> clickTask = new TaskCompletionSource<bool>();
+    private RenderFragment? dialogBody { get; set; }
+    private TaskCompletionSource<bool> clickConfirmTask = new TaskCompletionSource<bool>();
     private RenderFragment? actionButtons;
+    private string? promptValue;
 
     public async Task Show(string message, string? title = null)
     {
@@ -28,7 +29,8 @@
         actionButtons += @<button class="btn btn-primary w-25" @onclick="Close">OK</button>;
 
         await CenterDialogBox();
-        messageContent = message;
+        dialogBody = null;
+        dialogBody = @<span>@message</span>;
         dialogBox.Header = title ?? dialogBox.Header;
         StateHasChanged();
     }
@@ -40,27 +42,57 @@
         actionButtons += @<button class="btn btn-secondary w-25 me-1" @onclick="Close">Cancel</button>;
 
         await CenterDialogBox();
-        messageContent = message;
+        dialogBody = null;
+        dialogBody = @<span>@message</span>;
         dialogBox.Header = title ?? dialogBox.Header;
         StateHasChanged();
 
-        var confirmResult = await clickTask.Task;
+        var confirmResult = await clickConfirmTask.Task;
 
         return confirmResult;
+    }
+
+    public async Task<string?> ShowPromptBox(string message, string? title = null)
+    {
+        actionButtons = null;
+        actionButtons = @<button class="btn btn-primary w-25" @onclick="Confirm">OK</button>;
+        actionButtons += @<button class="btn btn-secondary w-25 me-1" @onclick="Close">Cancel</button>;
+
+        await CenterDialogBox();
+        dialogBox.Header = title ?? dialogBox.Header;
+        promptValue = null;
+        dialogBody = null;
+        dialogBody += @<div>@message</div>;
+        dialogBody += @<input class="form-control" type="text" @bind="promptValue">;
+        StateHasChanged();
+
+        var confirmResult = await clickConfirmTask.Task;
+
+        if (confirmResult && string.IsNullOrWhiteSpace(promptValue))
+            return string.Empty;
+        else
+            return promptValue;
+    }
+
+    private void AddConfirmButtons()
+    {
+        actionButtons = null;
+        actionButtons = @<button class="btn btn-primary w-25" @onclick="Confirm">OK</button>;
+        actionButtons += @<button class="btn btn-secondary w-25 me-1" @onclick="Close">Cancel</button>;
     }
 
     private void Confirm()
     {
         dialogBox.Display = "none";
-        clickTask.TrySetResult(true);
-        clickTask = new TaskCompletionSource<bool>();
+        clickConfirmTask.TrySetResult(true);
+        clickConfirmTask = new TaskCompletionSource<bool>();
     }
-
+    
     private void Close()
     {
         dialogBox.Display = "none";
-        clickTask.TrySetResult(false);
-        clickTask = new TaskCompletionSource<bool>();
+        clickConfirmTask.TrySetResult(false);
+        clickConfirmTask = new TaskCompletionSource<bool>();
     }
 
     private async Task CenterDialogBox()

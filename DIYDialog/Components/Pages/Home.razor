@@ -10,6 +10,7 @@ Welcome to your new app.
 <div>
     <button class="btn btn-primary" @onclick="ShowDialogBox">Show Dialog Box</button>
     <button class="btn btn-primary" @onclick="ShowConfirmDialogBox">Show Confirm Dialog Box</button>
+    <button class="btn btn-primary" @onclick="ShowPromptDialogBox">Show Prompt Dialog Box</button>
 </div>
 
 <DialogBox @ref="dialogBox"></DialogBox>
@@ -26,5 +27,11 @@ Welcome to your new app.
     {
         var confirmed = await dialogBox.ShowConfirmBox("Are you sure?", "Confirm");
         Console.WriteLine(confirmed);
-    }     
+    }
+    
+    private async Task ShowPromptDialogBox()
+    {
+        var promptResult = await dialogBox.ShowPromptBox("How old are you?", "Prompt");
+        Console.WriteLine(promptResult);
+    }
 }
