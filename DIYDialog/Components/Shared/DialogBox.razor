@@ -6,13 +6,12 @@
     <div class="card">
         <div class="card-header">
             <span>@dialogBox.Header</span>
-            <button @onclick="Close" type="button" class="btn-close" aria-label="Close" style="float:right;"></button>
         </div>
         <div class="card-body">
             @messageContent
         </div>
         <div class="card-footer d-flex flex-row-reverse">
-            <button class="btn btn-primary w-25" @onclick="Close">OK</button>
+            @actionButtons
         </div>
     </div>
 </div>
@@ -20,21 +19,56 @@
 @code {
     private DialogBoxSettings dialogBox = new DialogBoxSettings();
     private string? messageContent { get; set; }
+    private TaskCompletionSource<bool> clickTask = new TaskCompletionSource<bool>();
+    private RenderFragment? actionButtons;
 
     public async Task Show(string message, string? title = null)
     {
-        var windowDimensions = await JSRuntime.InvokeAsync<WindowDimensions>("getWindowDimensions");
-        dialogBox.Left = (windowDimensions.Width / 2) - (dialogBox.Width / 2);
-        dialogBox.Top = (windowDimensions.Height / 2) - (dialogBox.Height / 2);
-        dialogBox.Display = "inherit";
+        actionButtons = null;
+        actionButtons += @<button class="btn btn-primary w-25" @onclick="Close">OK</button>;
+
+        await CenterDialogBox();
         messageContent = message;
         dialogBox.Header = title ?? dialogBox.Header;
         StateHasChanged();
     }
 
+    public async Task<bool> ShowConfirmBox(string message, string? title = null)
+    {
+        actionButtons = null;
+        actionButtons = @<button class="btn btn-primary w-25" @onclick="Confirm">OK</button>;
+        actionButtons += @<button class="btn btn-secondary w-25 me-1" @onclick="Close">Cancel</button>;
+
+        await CenterDialogBox();
+        messageContent = message;
+        dialogBox.Header = title ?? dialogBox.Header;
+        StateHasChanged();
+
+        var confirmResult = await clickTask.Task;
+
+        return confirmResult;
+    }
+
+    private void Confirm()
+    {
+        dialogBox.Display = "none";
+        clickTask.TrySetResult(true);
+        clickTask = new TaskCompletionSource<bool>();
+    }
+
     private void Close()
     {
         dialogBox.Display = "none";
+        clickTask.TrySetResult(false);
+        clickTask = new TaskCompletionSource<bool>();
+    }
+
+    private async Task CenterDialogBox()
+    {
+        var windowDimensions = await JSRuntime.InvokeAsync<WindowDimensions>("getWindowDimensions");
+        dialogBox.Left = (windowDimensions.Width / 2) - (dialogBox.Width / 2);
+        dialogBox.Top = (windowDimensions.Height / 2) - (dialogBox.Height / 2);
+        dialogBox.Display = "inherit";
     }
 
     class WindowDimensions
