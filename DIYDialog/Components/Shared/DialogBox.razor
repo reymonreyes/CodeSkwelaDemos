@@ -1,0 +1,131 @@
+﻿@inject IJSRuntime JSRuntime
+
+<div class="dialog-overlay" style="display:@dialogBox.Display;">
+</div>
+<div style="@dialogBox.CssString">
+    <div class="card">
+        <div class="card-header">
+            <span>@dialogBox.Header</span>
+        </div>
+        <div class="card-body">
+            @dialogBody
+        </div>
+        <div class="card-footer d-flex flex-row-reverse">
+            @actionButtons
+        </div>
+    </div>
+</div>
+
+@code {
+    private DialogBoxSettings dialogBox = new DialogBoxSettings();
+    private RenderFragment? dialogBody { get; set; }
+    private TaskCompletionSource<bool> clickConfirmTask = new TaskCompletionSource<bool>();
+    private RenderFragment? actionButtons;
+    private string? promptValue;
+
+    public async Task Show(string message, string? title = null)
+    {
+        actionButtons = null;
+        actionButtons += @<button class="btn btn-primary w-25" @onclick="Close">OK</button>;
+
+        await CenterDialogBox();
+        dialogBody = null;
+        dialogBody = @<span>@message</span>;
+        dialogBox.Header = title ?? dialogBox.Header;
+        StateHasChanged();
+    }
+
+    public async Task<bool> ShowConfirmBox(string message, string? title = null)
+    {
+        actionButtons = null;
+        actionButtons = @<button class="btn btn-primary w-25" @onclick="Confirm">OK</button>;
+        actionButtons += @<button class="btn btn-secondary w-25 me-1" @onclick="Close">Cancel</button>;
+
+        await CenterDialogBox();
+        dialogBody = null;
+        dialogBody = @<span>@message</span>;
+        dialogBox.Header = title ?? dialogBox.Header;
+        StateHasChanged();
+
+        var confirmResult = await clickConfirmTask.Task;
+
+        return confirmResult;
+    }
+
+    public async Task<string?> ShowPromptBox(string message, string? title = null)
+    {
+        actionButtons = null;
+        actionButtons = @<button class="btn btn-primary w-25" @onclick="Confirm">OK</button>;
+        actionButtons += @<button class="btn btn-secondary w-25 me-1" @onclick="Close">Cancel</button>;
+
+        await CenterDialogBox();
+        dialogBox.Header = title ?? dialogBox.Header;
+        promptValue = null;
+        dialogBody = null;
+        dialogBody += @<div>@message</div>;
+        dialogBody += @<input class="form-control" type="text" @bind="promptValue">;
+        StateHasChanged();
+
+        var confirmResult = await clickConfirmTask.Task;
+
+        if (confirmResult && string.IsNullOrWhiteSpace(promptValue))
+            return string.Empty;
+        else
+            return promptValue;
+    }
+
+    private void AddConfirmButtons()
+    {
+        actionButtons = null;
+        actionButtons = @<button class="btn btn-primary w-25" @onclick="Confirm">OK</button>;
+        actionButtons += @<button class="btn btn-secondary w-25 me-1" @onclick="Close">Cancel</button>;
+    }
+
+    private void Confirm()
+    {
+        dialogBox.Display = "none";
+        clickConfirmTask.TrySetResult(true);
+        clickConfirmTask = new TaskCompletionSource<bool>();
+    }
+    
+    private void Close()
+    {
+        dialogBox.Display = "none";
+        clickConfirmTask.TrySetResult(false);
+        clickConfirmTask = new TaskCompletionSource<bool>();
+    }
+
+    private async Task CenterDialogBox()
+    {
+        var windowDimensions = await JSRuntime.InvokeAsync<WindowDimensions>("getWindowDimensions");
+        dialogBox.Left = (windowDimensions.Width / 2) - (dialogBox.Width / 2);
+        dialogBox.Top = (windowDimensions.Height / 2) - (dialogBox.Height / 2);
+        dialogBox.Display = "inherit";
+    }
+
+    class WindowDimensions
+    {
+        public int Height { get; set; }
+        public int Width { get; set; }
+    }
+
+    class DialogBoxSettings
+    {
+        public int Height { get; set; } = 100;
+        public int Width { get; set; } = 500;
+        public string BackgroundColor { get; set; } = "transparent";
+        public int Top { get; set; } = 0;
+        public int Left { get; set; } = 0;
+        public int ZIndex { get; set; } = 999999;
+        public string Display { get; set; } = "none";
+        public string Header { get; set; } = "Dialog Box";
+
+        public string CssString
+        {
+            get
+            {
+                return $"min-height:{Height}px;width:{Width}px;background-color:{BackgroundColor};position:fixed;top:{Top}px;left:{Left}px;z-index:{ZIndex};display:{Display};";
+            }
+        }
+    }
+}

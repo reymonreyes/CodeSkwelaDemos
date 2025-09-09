@@ -16,6 +16,11 @@
 <body>
     <Routes @rendermode="InteractiveServer" />
     <script src="_framework/blazor.web.js"></script>
+    <script>
+        window.getWindowDimensions = () => {
+            return { height: window.innerHeight, width: window.innerWidth };
+        }
+    </script>
 </body>
 
 </html>
